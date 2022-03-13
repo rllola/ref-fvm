@@ -11,9 +11,14 @@ use crate::state_tree::StateTree;
 use crate::Kernel;
 
 pub mod backtrace;
+
 pub use backtrace::Backtrace;
+
 mod default;
+
 pub use default::DefaultCallManager;
+
+use crate::trace::ExecutionTrace;
 
 /// BlockID representing nil parameters or return data.
 pub const NO_DATA_BLOCK_ID: u32 = 0;
@@ -58,7 +63,7 @@ pub trait CallManager: 'static {
     ) -> Result<InvocationResult>;
 
     /// Finishes execution, returning the gas used and the machine.
-    fn finish(self) -> (i64, backtrace::Backtrace, Self::Machine);
+    fn finish(self) -> (FinishResult, Self::Machine);
 
     /// Returns a reference to the machine.
     fn machine(&self) -> &Self::Machine;
@@ -117,10 +122,11 @@ pub trait CallManager: 'static {
 }
 
 /// The result of a method invocation.
+#[derive(Clone, Debug)]
 pub enum InvocationResult {
-    /// Indicates that the actor sucessfully returned. The value may be empty.
+    /// Indicates that the actor successfully returned. The value may be empty.
     Return(RawBytes),
-    /// Indicates taht the actor aborted with the given exit code.
+    /// Indicates that the actor aborted with the given exit code.
     Failure(ExitCode),
 }
 
@@ -139,4 +145,10 @@ impl InvocationResult {
             Self::Failure(e) => *e,
         }
     }
+}
+
+pub struct FinishResult {
+    pub(crate) gas_used: i64,
+    pub(crate) backtrace: Backtrace,
+    pub(crate) exec_trace: Option<ExecutionTrace>,
 }

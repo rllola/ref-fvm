@@ -10,10 +10,12 @@ use num_traits::Zero;
 
 use super::{Backtrace, CallManager, InvocationResult, NO_DATA_BLOCK_ID};
 use crate::call_manager::backtrace::Frame;
+use crate::call_manager::FinishResult;
 use crate::gas::GasTracker;
 use crate::kernel::{ClassifyResult, ExecutionError, Kernel, Result};
 use crate::machine::Machine;
 use crate::syscalls::error::Abort;
+use crate::trace::{ExecutionEvent, ExecutionTrace, SendParams};
 use crate::{account_actor, syscall_error};
 
 /// The default [`CallManager`] implementation.
@@ -39,6 +41,8 @@ pub struct InnerDefaultCallManager<M> {
     call_stack_depth: u32,
     /// The current chain of errors, if any.
     backtrace: Backtrace,
+    /// The current execution trace.
+    exec_trace: Option<ExecutionTrace>,
 }
 
 #[doc(hidden)]
@@ -72,6 +76,7 @@ where
             num_actors_created: 0,
             call_stack_depth: 0,
             backtrace: Backtrace::default(),
+            exec_trace: None,
         }))
     }
 
@@ -86,6 +91,21 @@ where
     where
         K: Kernel<CallManager = Self>,
     {
+        if self.machine.config().debug {
+            let call_event = ExecutionEvent::Call(SendParams {
+                from,
+                to,
+                method,
+                params: params.clone(),
+                value: value.clone(),
+            });
+            if self.exec_trace.is_none() {
+                self.exec_trace = Some(vec![call_event]);
+            } else {
+                self.exec_trace.as_mut().unwrap().push(call_event);
+            }
+        }
+
         if self.call_stack_depth > self.machine.config().max_call_depth {
             return Err(
                 syscall_error!(LimitExceeded, "message execution exceeds call depth").into(),
@@ -94,6 +114,14 @@ where
         self.call_stack_depth += 1;
         let result = self.send_unchecked::<K>(from, to, method, params, value);
         self.call_stack_depth -= 1;
+
+        if self.machine.config().debug {
+            self.exec_trace
+                .as_mut()
+                .unwrap()
+                .push(ExecutionEvent::Return(result.clone()));
+        }
+
         result
     }
 
@@ -110,12 +138,19 @@ where
         res
     }
 
-    fn finish(mut self) -> (i64, Backtrace, Self::Machine) {
+    fn finish(mut self) -> (FinishResult, Self::Machine) {
         let gas_used = self.gas_tracker.gas_used().max(0);
 
         let inner = self.0.take().expect("call manager is poisoned");
         // TODO: Having to check against zero here is fishy, but this is what lotus does.
-        (gas_used, inner.backtrace, inner.machine)
+        (
+            FinishResult {
+                gas_used,
+                backtrace: inner.backtrace,
+                exec_trace: inner.exec_trace,
+            },
+            inner.machine,
+        )
     }
 
     // Accessor methods so the trait can implement some common methods by default.

@@ -15,6 +15,7 @@ use num_traits::Zero;
 
 use super::{ApplyFailure, ApplyKind, ApplyRet, Executor};
 use crate::call_manager::{backtrace, CallManager, InvocationResult};
+use crate::executor::ExecutionTrace;
 use crate::gas::{GasCharge, GasOutputs};
 use crate::kernel::{ClassifyResult, Context as _, ExecutionError, Kernel};
 use crate::machine::{Machine, BURNT_FUNDS_ACTOR_ADDR, REWARD_ACTOR_ADDR};
@@ -59,12 +60,12 @@ where
             };
 
         // Apply the message.
-        let (res, gas_used, mut backtrace) = self.map_machine(|machine| {
+        let (res, gas_used, mut backtrace, exec_trace) = self.map_machine(|machine| {
             let mut cm = K::CallManager::new(machine, msg.gas_limit, msg.from, msg.sequence);
-            // This error is fatal because it should have already been acounted for inside
+            // This error is fatal because it should have already been accounted for inside
             // preflight_message.
             if let Err(e) = cm.charge_gas(inclusion_cost) {
-                return (Err(e), cm.finish().2);
+                return (Err(e), cm.finish().1);
             }
 
             let result = cm.with_transaction(|cm| {
@@ -79,8 +80,11 @@ where
 
                 Ok(ret)
             });
-            let (gas_used, backtrace, machine) = cm.finish();
-            (Ok((result, gas_used, backtrace)), machine)
+            let (res, machine) = cm.finish();
+            (
+                Ok((result, res.gas_used, res.backtrace, res.exec_trace)),
+                machine,
+            )
         })?;
 
         // Extract the exit code and build the result of the message application.
@@ -119,7 +123,7 @@ where
                             "unexpected syscall error when processing message: {} ({})",
                             code,
                             code as u32
-                        ))
+                        ));
                     }
                 };
 
@@ -138,7 +142,7 @@ where
                     msg.sequence,
                     msg.method_num,
                     self.context().epoch
-                )))
+                )));
             }
         };
 
@@ -149,12 +153,15 @@ where
         };
 
         match apply_kind {
-            ApplyKind::Explicit => self.finish_message(msg, receipt, failure_info, gas_cost),
+            ApplyKind::Explicit => {
+                self.finish_message(msg, receipt, failure_info, gas_cost, exec_trace)
+            }
             ApplyKind::Implicit => Ok(ApplyRet {
                 msg_receipt: receipt,
                 failure_info,
                 penalty: TokenAmount::zero(),
                 miner_tip: TokenAmount::zero(),
+                exec_trace,
             }),
         }
     }
@@ -230,7 +237,7 @@ where
                     ExitCode::SysErrSenderInvalid,
                     "Sender invalid",
                     miner_penalty_amount,
-                )))
+                )));
             }
         };
 
@@ -249,7 +256,7 @@ where
                     ExitCode::SysErrSenderInvalid,
                     "Sender invalid",
                     miner_penalty_amount,
-                )))
+                )));
             }
         };
 
@@ -309,6 +316,7 @@ where
         receipt: Receipt,
         failure_info: Option<ApplyFailure>,
         gas_cost: BigInt,
+        exec_trace: Option<ExecutionTrace>,
     ) -> anyhow::Result<ApplyRet> {
         // NOTE: we don't support old network versions in the FVM, so we always burn.
         let GasOutputs {
@@ -361,6 +369,7 @@ where
             failure_info,
             penalty: miner_penalty,
             miner_tip,
+            exec_trace,
         })
     }
 
