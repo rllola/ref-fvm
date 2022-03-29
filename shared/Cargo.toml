@@ -10,8 +10,7 @@ repository = "https://github.com/filecoin-project/ref-fvm"
 [dependencies]
 serde = { version = "1.0", features = ["derive"] }
 serde_bytes = { package = "cs_serde_bytes", version = "0.12" }
-# TODO remove fork in future (allowing non utf8 strings to be cbor deserialized)
-serde_ipld_dagcbor = "0.1.2"
+ciborium = { git = "https://github.com/vmx/ciborium", branch = "dag-cbor" }
 serde_tuple = "0.5"
 serde_repr = "0.1"
 chrono = "0.4.9"

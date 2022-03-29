@@ -3,8 +3,8 @@
 
 use std::{fmt, io};
 
+use ciborium::{de::Error as CborDeError, ser::Error as CborSerError};
 use cid::Error as CidError;
-use serde_ipld_dagcbor::error::Error as CborError;
 use thiserror::Error;
 
 /// Error type for encoding and decoding data through any Forest supported protocol.
@@ -18,8 +18,17 @@ pub struct Error {
     pub protocol: CodecProtocol,
 }
 
-impl From<CborError> for Error {
-    fn from(err: CborError) -> Error {
+impl<T: fmt::Debug> From<CborDeError<T>> for Error {
+    fn from(err: CborDeError<T>) -> Self {
+        Self {
+            description: err.to_string(),
+            protocol: CodecProtocol::Cbor,
+        }
+    }
+}
+
+impl<T: fmt::Debug> From<CborSerError<T>> for Error {
+    fn from(err: CborSerError<T>) -> Self {
         Self {
             description: err.to_string(),
             protocol: CodecProtocol::Cbor,

@@ -9,7 +9,6 @@ mod vec;
 
 pub use serde::{de, ser};
 pub use serde_bytes;
-pub use serde_ipld_dagcbor::{from_reader, from_slice, to_writer};
 
 pub use self::bytes::*;
 pub use self::cbor::*;
@@ -29,14 +28,20 @@ pub mod repr {
     pub use serde_repr::{Deserialize_repr, Serialize_repr};
 }
 
-// TODO: upstream this. Upstream doesn't allow encoding unsized types (e.g., slices).
-
 /// Serializes a value to a vector.
 pub fn to_vec<T>(value: &T) -> Result<Vec<u8>, Error>
 where
     T: ser::Serialize + ?Sized,
 {
     let mut vec = Vec::new();
-    value.serialize(&mut serde_ipld_dagcbor::Serializer::new(&mut vec))?;
+    ciborium::ser::into_writer(value, &mut vec)?;
     Ok(vec)
+}
+
+/// Deserialize a value from a slice.
+pub fn from_slice<'a, T>(slice: &'a [u8]) -> Result<T, Error>
+where
+    T: de::Deserialize<'a>,
+{
+    ciborium::de::from_reader(slice).map_err(Into::into)
 }

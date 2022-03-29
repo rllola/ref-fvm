@@ -14,3 +14,7 @@ overflow-checks = true
 lto = true
 opt-level = "z"
 #strip = true
+
+[patch.crates-io]
+fvm_shared = { path = "./shared" }
+fvm_ipld_car = { path = "./ipld/car" }
