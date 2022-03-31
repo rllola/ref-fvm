@@ -86,6 +86,18 @@ where
     where
         K: Kernel<CallManager = Self>,
     {
+        // We check _then_ set because we don't count the top call. By example:
+        //
+        // 1. If the max depth is 0, call_stack_depth will be 1 and the top-level message won't be
+        //    able to make sub-calls (1 > 0).
+        // 2. If the max depth is 1, the call_stack_depth will be 1 in the top-level message, 2 in
+        //    sub-calls, and said sub-calls will not be able to make further subcalls (2 > 1).
+        //
+        // NOTE: This means we can actually have a full "depth" of max_call_depth + 1, but that's
+        // how the network currently operates.
+        //
+        // NOTE: While lotus adds then checks (unlike the FVM which checks then adds), the
+        // call_stack_depth starts at 0 for the first-level while it's 1 in the FVM.
         if self.call_stack_depth > self.machine.config().max_call_depth {
             return Err(
                 syscall_error!(LimitExceeded, "message execution exceeds call depth").into(),
