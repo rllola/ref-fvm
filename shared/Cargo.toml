@@ -14,7 +14,6 @@ serde_bytes = { package = "cs_serde_bytes", version = "0.12" }
 serde_ipld_dagcbor = "0.1.2"
 serde_tuple = "0.5"
 serde_repr = "0.1"
-chrono = "0.4.9"
 blake2b_simd = "1.0.0"
 thiserror = "1.0"
 num-traits = "0.2"
