@@ -22,7 +22,7 @@ impl ExitCode {
     }
 
     pub fn value(self) -> u32 {
-        return self.value;
+        self.value
     }
 
     /// Returns true if the exit code indicates success.

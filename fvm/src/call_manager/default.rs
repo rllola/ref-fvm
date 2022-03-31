@@ -4,7 +4,7 @@ use fvm_shared::actor::builtin::Type;
 use fvm_shared::address::{Address, Protocol};
 use fvm_shared::econ::TokenAmount;
 use fvm_shared::encoding::{RawBytes, DAG_CBOR};
-use fvm_shared::error::{SystemExitCode};
+use fvm_shared::error::SystemExitCode;
 use fvm_shared::{ActorID, MethodNum, METHOD_SEND};
 use num_traits::Zero;
 
