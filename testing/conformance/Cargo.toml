@@ -18,7 +18,7 @@ fvm_ipld_car = { version = "0.3.0", path = "../../ipld/car" }
 anyhow = "1.0.47"
 thiserror = "1.0.30"
 num-traits = "0.2"
-derive_builder = "0.10"
+derive_builder = "0.11"
 ahash = "0.7"
 num-derive = "0.3.3"
 cid = { version = "0.8.2", default-features = false }
@@ -34,7 +34,7 @@ log = "0.4.14"
 byteorder = "1.4.3"
 futures = "0.3.19"
 async-std = { version = "1.9", features = ["attributes"] }
-wasmtime = { version = "0.33.0" }
+wasmtime = { version = "0.35.0" }
 base64 = "0.13.0"
 flate2 = { version = "1.0" }
 colored = "2"
