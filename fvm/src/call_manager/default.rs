@@ -4,7 +4,7 @@ use fvm_shared::actor::builtin::Type;
 use fvm_shared::address::{Address, Protocol};
 use fvm_shared::econ::TokenAmount;
 use fvm_shared::encoding::{RawBytes, DAG_CBOR};
-use fvm_shared::error::ExitCode;
+use fvm_shared::error::{SystemExitCode};
 use fvm_shared::{ActorID, MethodNum, METHOD_SEND};
 use num_traits::Zero;
 
@@ -310,7 +310,7 @@ where
                         .data()
                         .kernel
                         .block_get(return_block_id)
-                        .map_err(|e| Abort::from_error(ExitCode::SysErrIllegalActor, e))?;
+                        .map_err(|e| Abort::from_error(SystemExitCode::MISSING_RETURN, e))?;
                     debug_assert_eq!(code, DAG_CBOR);
                     RawBytes::new(ret)
                 } else {
@@ -337,14 +337,12 @@ where
                             (code, message, Ok(InvocationResult::Failure(code)))
                         }
                         Abort::OutOfGas => (
-                            ExitCode::SysErrOutOfGas,
+                            SystemExitCode::OUT_OF_GAS,
                             "out of gas".to_owned(),
                             Err(ExecutionError::OutOfGas),
                         ),
                         Abort::Fatal(err) => (
-                            // TODO: will be changed to a SysErrAssertionFailed when we
-                            // introduce the new exit codes.
-                            ExitCode::SysErrIllegalArgument,
+                            SystemExitCode::ASSERTION_FAILED,
                             "fatal error".to_owned(),
                             Err(ExecutionError::Fatal(err)),
                         ),
