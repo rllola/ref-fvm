@@ -94,6 +94,12 @@ fn memory_and_data<'a, K: Kernel>(
     Ok((Memory::new(mem), data))
 }
 
+fn update_gas_snapshots<'a, K: Kernel>(
+    caller: &'a mut Caller<'_, InvocationData<K>>,
+) -> Result<(&'a mut Memory, &'a mut InvocationData<K>), Trap> {
+    caller.data().kernel.
+}
+
 // Unfortunately, we can't implement this for _all_ functions. So we implement it for functions of up to 6 arguments.
 macro_rules! impl_bind_syscalls {
     ($($t:ident)*) => {
@@ -114,6 +120,7 @@ macro_rules! impl_bind_syscalls {
                 if mem::size_of::<Ret::Value>() == 0 {
                     // If we're returning a zero-sized "value", we return no value therefore and expect no out pointer.
                     self.func_wrap(module, name, move |mut caller: Caller<'_, InvocationData<K>> $(, $t: $t)*| {
+                        update_gas_snapshots(&mut caller);
                         let (mut memory, mut data) = memory_and_data(&mut caller)?;
                         let ctx = Context{kernel: &mut data.kernel, memory: &mut memory};
                         Ok(match syscall(ctx $(, $t)*).into()? {

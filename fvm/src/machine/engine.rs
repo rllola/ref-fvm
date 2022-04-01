@@ -58,6 +58,8 @@ impl Default for Engine {
 
         // c.cranelift_opt_level(Speed); ?
 
+        c.consume_fuel(true);
+
         Engine::new(&c).unwrap()
     }
 }
@@ -206,6 +208,6 @@ impl Engine {
 
     /// Construct a new wasmtime "store" from the given kernel.
     pub fn new_store<K: Kernel>(&self, kernel: K) -> wasmtime::Store<InvocationData<K>> {
-        wasmtime::Store::new(&self.0.engine, InvocationData::new(kernel))
+        wasmtime::Store::new(&self.0.engine, InvocationData::new(kernel)).fu()
     }
 }

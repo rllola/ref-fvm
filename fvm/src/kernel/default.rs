@@ -709,6 +709,22 @@ where
         self.call_manager
             .charge_gas(self.call_manager.price_list().on_submit_verify_seal())
     }
+
+    fn get_fuel_consumed_snapshot(&self) -> u64 {
+        self.call_manager.get_fuel_consumed_snapshot()
+    }
+
+    fn set_fuel_consumed_snapshot(&mut self, fuel: u64) {
+        self.set_fuel_consumed_snapshot(fuel)
+    }
+
+    fn get_gas_available_snapshot(&self) -> i64 {
+        self.call_manager.get_gas_available_snapshot()
+    }
+
+    fn set_gas_available_snapshot(&mut self, gas: i64) {
+        self.set_gas_available_snapshot(gas)
+    }
 }
 
 impl<C> NetworkOps for DefaultKernel<C>

@@ -10,6 +10,16 @@ mod charge;
 mod outputs;
 mod price_list;
 
+pub const GAS_TO_FUEL_MULTIPLIER: u64 = 1;
+
+pub fn gas_to_fuel(gas: i64) -> u64 {
+    return (gas * GAS_TO_FUEL_MULTIPLIER) as u64;
+}
+
+pub fn fuel_to_gas(fuel: u64) -> i64 {
+    return (fuel / GAS_TO_FUEL_MULTIPLIER) as i64;
+}
+
 pub struct GasTracker {
     gas_available: i64,
     gas_used: i64,

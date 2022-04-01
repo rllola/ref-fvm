@@ -10,7 +10,7 @@ use num_traits::Zero;
 
 use super::{Backtrace, CallManager, InvocationResult, NO_DATA_BLOCK_ID};
 use crate::call_manager::backtrace::Frame;
-use crate::gas::GasTracker;
+use crate::gas::{fuel_to_gas, gas_to_fuel, GasTracker};
 use crate::kernel::{ClassifyResult, ExecutionError, Kernel, Result};
 use crate::machine::Machine;
 use crate::syscalls::error::Abort;
@@ -37,6 +37,10 @@ pub struct InnerDefaultCallManager<M> {
     num_actors_created: u64,
     /// Current call-stack depth.
     call_stack_depth: u32,
+    /// Latest fuel consumed snapshot.
+    fuel_consumed_snapshot: u64,
+    /// Latest gas available snapshot.
+    gas_available_snapshot: i64,
     /// The current chain of errors, if any.
     backtrace: Backtrace,
 }
@@ -152,6 +156,22 @@ where
         let ret = self.num_actors_created;
         self.num_actors_created += 1;
         ret
+    }
+
+    fn get_fuel_consumed_snapshot(&self) -> u64 {
+        self.fuel_consumed_snapshot
+    }
+
+    fn set_fuel_consumed_snapshot(&mut self, fuel: u64) {
+        self.fuel_consumed_snapshot = fuel
+    }
+
+    fn get_gas_available_snapshot(&self) -> i64 {
+        self.gas_available_snapshot
+    }
+
+    fn set_gas_available_snapshot(&mut self, gas: i64) {
+        self.gas_available_snapshot = gas
     }
 }
 
@@ -282,6 +302,8 @@ where
 
             // Make a store.
             let mut store = engine.new_store(kernel);
+            store.add_fuel(gas_to_fuel(self.gas_tracker().gas_available()));
+            self.set_fuel_consumed_snapshot(0);
 
             // Instantiate the module.
             let instance = match engine

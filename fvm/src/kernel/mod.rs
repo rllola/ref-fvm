@@ -223,6 +223,30 @@ pub trait GasOps {
 
     /// Charges the gas associated with submitting a seal proof for future bulk verification
     fn on_submit_verify_seal(&mut self) -> Result<()>;
+
+    /// A snapshot is _taken_ every time execution moves _into_ WASM.
+    /// This happens at the first WASM invocation, and at the end of a syscall invocation.
+    /// The snapshot is _updated_ every time execution returns _from_ WASM.
+    /// This happens at the start of a syscall invocation as well as the end of WASM invocation.
+    /// Before a snapshot is _updated_, gas is consumed based on the delta.
+
+    /// Returns the "snapshotted" fuel consumed.
+    fn get_fuel_consumed_snapshot(&self) -> u64;
+
+    /// Sets the "snapshotted" fuel consumed.
+    fn set_fuel_consumed_snapshot(&mut self, fuel: u64);
+
+    /// A snapshot is _taken_ every time execution returns _from_ WASM.
+    /// This happens at the start of a syscall invocation as well as the end of WASM invocation.
+    /// The snapshot is _updated_ every time execution moves _into_ WASM.
+    /// This happens at the first WASM invocation, and at the end of a syscall invocation.
+    /// Before a snapshot is _updated_, fuel is consumed based on the delta.
+
+    /// Returns the "snapshotted" gas available.
+    fn get_gas_available_snapshot(&self) -> i64;
+
+    /// Sets the "snapshotted" gas available.
+    fn set_gas_available_snapshot(&mut self, gas: i64);
 }
 
 /// Cryptographic primitives provided by the kernel.

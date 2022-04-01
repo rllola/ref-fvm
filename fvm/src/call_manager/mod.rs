@@ -11,8 +11,11 @@ use crate::state_tree::StateTree;
 use crate::Kernel;
 
 pub mod backtrace;
+
 pub use backtrace::Backtrace;
+
 mod default;
+
 pub use default::DefaultCallManager;
 
 /// BlockID representing nil parameters or return data.
@@ -114,13 +117,37 @@ pub trait CallManager: 'static {
         self.gas_tracker_mut().charge_gas(charge)?;
         Ok(())
     }
+
+    /// A snapshot is _taken_ every time execution moves _into_ WASM.
+    /// This happens at the first WASM invocation, and at the end of a syscall invocation.
+    /// The snapshot is _updated_ every time execution returns _from_ WASM.
+    /// This happens at the start of a syscall invocation as well as the end of WASM invocation.
+    /// Before a snapshot is _updated_, gas is consumed based on the delta.
+
+    /// Returns the "snapshotted" fuel consumed.
+    fn get_fuel_consumed_snapshot(&self) -> u64;
+
+    /// Sets the "snapshotted" fuel consumed.
+    fn set_fuel_consumed_snapshot(&mut self, fuel: u64);
+
+    /// A snapshot is _taken_ every time execution returns _from_ WASM.
+    /// This happens at the start of a syscall invocation as well as the end of WASM invocation.
+    /// The snapshot is _updated_ every time execution moves _into_ WASM.
+    /// This happens at the first WASM invocation, and at the end of a syscall invocation.
+    /// Before a snapshot is _updated_, fuel is consumed based on the delta.
+
+    /// Returns the "snapshotted" gas available.
+    fn get_gas_available_snapshot(&self) -> i64;
+
+    /// Sets the "snapshotted" gas available.
+    fn set_gas_available_snapshot(&mut self, gas: i64);
 }
 
 /// The result of a method invocation.
 pub enum InvocationResult {
-    /// Indicates that the actor sucessfully returned. The value may be empty.
+    /// Indicates that the actor successfully returned. The value may be empty.
     Return(RawBytes),
-    /// Indicates taht the actor aborted with the given exit code.
+    /// Indicates that the actor aborted with the given exit code.
     Failure(ExitCode),
 }
 
