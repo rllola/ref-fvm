@@ -335,11 +335,9 @@ impl Engine {
         };
 
         println!("Calling linker.instance");
-        anyhow::Error::msg("We panic here");
 
         let instance = cache.linker.instantiate(&mut *store, module)?;
 
-        anyhow::Error::msg("Do we panic here ?");
         println!("Called linter.instantiate");
 
         Ok(Some(instance))
