@@ -340,6 +340,7 @@ where
         let engine = self.engine().clone();
 
         log::trace!("calling {} -> {}::{}", from, to, method);
+        println!("calling {} -> {}::{}", from, to, method);
         self.map_mut(|cm| {
             // Make the kernel.
             let kernel = K::new(cm, block_registry, from, to, method, value.clone());
@@ -349,11 +350,16 @@ where
 
             // From this point on, there are no more syscall errors, only aborts.
             let result: std::result::Result<BlockId, Abort> = (|| {
+
+                println!("wut");
+
                 // Instantiate the module.
                 let instance = engine
                     .get_instance(&mut store, &state.code)
                     .and_then(|i| i.context("actor code not found"))
                     .map_err(Abort::Fatal)?;
+
+                println!("we have the instance");
 
                 // Resolve and store a reference to the exported memory.
                 let memory = instance
@@ -361,6 +367,8 @@ where
                     .context("actor has no memory export")
                     .map_err(Abort::Fatal)?;
                 store.data_mut().memory = memory;
+
+                println!("we have the memory");
 
                 // Lookup the invoke method.
                 let invoke: wasmtime::TypedFunc<(u32,), u32> = instance

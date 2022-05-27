@@ -97,7 +97,7 @@ where
             nv,
             builtin_actors,
             executor: None,
-            code_cids: vec![],
+            code_cids: vec![init_code_cid],
             state_tree: Some(state_tree),
             accounts_code_cid,
         })
@@ -183,6 +183,7 @@ where
         let blockstore = state_tree.into_store();
 
         let mut nc = NetworkConfig::new(self.nv);
+        nc.enable_actor_debugging();
         nc.override_actors(self.builtin_actors);
 
         let mut mc = nc.for_epoch(0, state_root);

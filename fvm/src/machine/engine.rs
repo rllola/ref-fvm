@@ -310,11 +310,15 @@ impl Engine {
     ) -> anyhow::Result<Option<wasmtime::Instance>> {
         let mut instance_cache = self.0.instance_cache.lock().expect("cache poisoned");
 
+        println!("Getting into cache");
+
         let cache = match instance_cache.entry() {
             anymap::Entry::Occupied(e) => e.into_mut(),
             anymap::Entry::Vacant(e) => e.insert({
                 let mut linker = Linker::new(&self.0.engine);
                 linker.allow_shadowing(true);
+
+                println!("Ok we are here");
 
                 bind_syscalls(&mut linker)?;
                 Cache { linker }
@@ -329,7 +333,13 @@ impl Engine {
             Some(module) => module,
             None => return Ok(None),
         };
+
+        println!("Calling linker.instance");
+
         let instance = cache.linker.instantiate(&mut *store, module)?;
+
+        anyhow::Error::msg("Do we panic here ?");
+        println!("Called linter.instantiate");
 
         Ok(Some(instance))
     }

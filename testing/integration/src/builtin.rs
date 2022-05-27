@@ -18,7 +18,7 @@ use crate::error::Error::{
 
 const BUNDLES: [(NetworkVersion, &[u8]); 2] = [
     (NetworkVersion::V15, actors_v7::BUNDLE_CAR),
-    (NetworkVersion::V16, actors_v7::BUNDLE_CAR), // todo bad hack
+    (NetworkVersion::V16, actors_v8::BUNDLE_CAR), // todo bad hack
 ];
 
 // Import built-in actors
@@ -84,6 +84,7 @@ pub fn set_init_actor(
     init_code_cid: Cid,
     init_state: init_actor::State,
 ) -> Result<()> {
+    println!("init actor");
     let init_state_cid = state_tree
         .store()
         .put_cbor(&init_state, Code::Blake2b256)

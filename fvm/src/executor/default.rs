@@ -58,6 +58,7 @@ where
         apply_kind: ApplyKind,
         raw_length: usize,
     ) -> anyhow::Result<ApplyRet> {
+        println!("Calling preflight");
         // Validate if the message was correct, charge for it, and extract some preliminary data.
         let (sender_id, gas_cost, inclusion_cost) =
             match self.preflight_message(&msg, apply_kind, raw_length)? {
@@ -65,6 +66,7 @@ where
                 Err(apply_ret) => return Ok(apply_ret),
             };
 
+        println!("Calling map_machine");
         // Apply the message.
         let (res, gas_used, mut backtrace, exec_trace) = self.map_machine(|machine| {
             let mut cm = K::CallManager::new(machine, msg.gas_limit, msg.from, msg.sequence);
@@ -80,6 +82,8 @@ where
                 Some(Block::new(DAG_CBOR, msg.params.bytes()))
             };
 
+            println!("call with_transaction");
+
             let result = cm.with_transaction(|cm| {
                 // Invoke the message.
                 let ret = cm.send::<K>(sender_id, msg.to, msg.method_num, params, &msg.value)?;
@@ -93,6 +97,7 @@ where
 
                 Ok(ret)
             });
+            println!("call finish");
             let (res, machine) = cm.finish();
             (
                 Ok((result, res.gas_used, res.backtrace, res.exec_trace)),

@@ -14,7 +14,8 @@ fvm_ipld_car = { version = "0.4.1", path = "../../ipld/car" }
 fvm_ipld_blockstore = { version = "0.1.1", path = "../../ipld/blockstore" }
 fvm_ipld_encoding = { version = "0.2.1", path = "../../ipld/encoding" }
 
-actors-v7 = { version = "~7.4", package = "fil_builtin_actors_bundle" }
+actors-v7 = { version = "7.5.0", package = "fil_builtin_actors_bundle" }
+actors-v8 = { version = "8.0.0-alpha.1", package = "fil_builtin_actors_bundle", path = "../../../builtin-actors" }
 anyhow = "1.0.47"
 cid = { version = "0.8.2", default-features = false }
 futures = "0.3.19"
@@ -28,6 +29,7 @@ serde = { version = "1.0", features = ["derive"] }
 serde_tuple = "0.5"
 serde_repr = "0.1"
 thiserror = "1.0.30"
+hex = "0.4.2"
 
 [dependencies.wasmtime]
 version = "0.36.0"
