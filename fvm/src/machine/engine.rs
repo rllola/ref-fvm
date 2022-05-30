@@ -71,7 +71,7 @@ pub fn default_wasmtime_config() -> wasmtime::Config {
 
     // wasmtime default: false
     // We don't want threads, there is no way to ensure determisism
-    c.wasm_threads(false);
+    /*c.wasm_threads(false);
 
     // wasmtime default: true
     // simd isn't supported in wasm-instrument, but if we add support there, we can probably enable this.
@@ -134,7 +134,7 @@ pub fn default_wasmtime_config() -> wasmtime::Config {
 
     // Doesn't seem to have significant impact on the time it takes to load code
     // todo(M2): make sure this is guaranteed to run in linear time.
-    c.cranelift_opt_level(Speed);
+    c.cranelift_opt_level(Speed);*/
 
     c
 }
