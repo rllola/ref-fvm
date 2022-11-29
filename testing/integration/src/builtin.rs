@@ -23,6 +23,7 @@ pub fn fetch_builtin_code_cid(
         *manifest.get_account_code(),
         *manifest.get_embryo_code(),
         *manifest.get_eam_code(),
+        *manifest.get_storagemarket_code()
     ))
 }
 
@@ -93,4 +94,26 @@ pub fn set_eam_actor(state_tree: &mut StateTree<impl Blockstore>, eam_code_cid: 
         .set_actor(EAM_ACTOR_ID, eam_actor_state)
         .map_err(anyhow::Error::from)
         .context(FailedToSetActor("eam actor".to_owned()))
+}
+
+pub fn set_storagemarket_actor(state_tree: &mut StateTree<impl Blockstore>, storagemarket_code_cid: Cid) -> Result<()> {
+    const STORAGE_MARKET_ACTOR: ActorID = 5;
+
+    let storagemarket_state_cid = state_tree
+        .store()
+        .put_cbor(&[(); 0], Code::Blake2b256)
+        .context(FailedToSetState("storagemarket actor".to_owned()))?;
+
+    let storagemarket_actor_state = ActorState {
+        code: storagemarket_code_cid,
+        state: storagemarket_state_cid,
+        sequence: 0,
+        balance: Default::default(),
+        address: None,
+    };
+
+    state_tree
+        .set_actor(STORAGE_MARKET_ACTOR, storagemarket_actor_state)
+        .map_err(anyhow::Error::from)
+        .context(FailedToSetActor("storagemarket actor".to_owned()))
 }

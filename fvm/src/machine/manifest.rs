@@ -21,6 +21,8 @@ const INIT_ACTOR_NAME: &str = "init";
 const SYSTEM_ACTOR_NAME: &str = "system";
 const EMBRYO_ACTOR_NAME: &str = "embryo";
 const EAM_ACTOR_NAME: &str = "eam";
+const STORAGE_MARKET_ACTOR_NAME: &str = "storagemarket";
+
 
 /// A mapping of builtin actor CIDs to their respective types.
 pub struct Manifest {
@@ -29,6 +31,7 @@ pub struct Manifest {
     system_code: Cid,
     init_code: Cid,
     eam_code: Cid,
+    storagemarket_code: Cid,
     singletons: HashSet<Cid>,
 
     by_id: HashMap<u32, Cid>,
@@ -69,6 +72,7 @@ impl Manifest {
         ("cron", id_cid(b"fil/test/cron")),
         ("account", id_cid(b"fil/test/account")),
         ("embryo", id_cid(b"fil/test/embryo")),
+        ("storagemarket", id_cid(b"fil/test/storagemarket")),
     ];
 
     #[cfg(any(feature = "testing", test))]
@@ -133,12 +137,17 @@ impl Manifest {
             .get(EAM_ACTOR_NAME)
             .context("manifest missing eam actor")?;
 
+        let storagemarket_code = *by_name
+            .get(STORAGE_MARKET_ACTOR_NAME)
+            .context("manifest missing storagemarket actor")?;
+
         Ok(Self {
             account_code,
             system_code,
             init_code,
             embryo_code,
             eam_code,
+            storagemarket_code,
             singletons,
             by_id,
             by_code,
@@ -163,6 +172,11 @@ impl Manifest {
     /// Returns true id the passed code CID is the embryo actor.
     pub fn is_embryo_actor(&self, cid: &Cid) -> bool {
         &self.embryo_code == cid
+    }
+
+    /// Returns true id the passed code CID is the storagemarket actor.
+    pub fn is_storagemarket_actor(&self, cid: &Cid) -> bool {
+        &self.storagemarket_code == cid
     }
 
     /// Returns true id the passed code is a singleton actor.
@@ -197,5 +211,10 @@ impl Manifest {
     /// Returns the code CID for the system actor.
     pub fn get_embryo_code(&self) -> &Cid {
         &self.embryo_code
+    }
+
+    /// Returns the code CID for the storagemarket actor.
+    pub fn get_storagemarket_code(&self) -> &Cid {
+        &self.storagemarket_code
     }
 }
