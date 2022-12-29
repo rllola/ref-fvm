@@ -47,7 +47,6 @@ pub mod storagemarket_actor;
 #[cfg(feature = "testing")]
 pub mod storagepower_actor;
 
-
 mod eam_actor;
 pub mod trace;
 

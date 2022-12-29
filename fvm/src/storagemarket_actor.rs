@@ -91,6 +91,26 @@ impl State {
             .flush()
             .unwrap();
 
+        let empty_states_array = Amt::<(), _>::new_with_bit_width(store, 6)
+            .flush()
+            .unwrap();
+
+        let empty_pending_proposals_map = Hamt::<_, ()>::new_with_bit_width(store, 5)
+            .flush()
+            .unwrap();
+        
+        let empty_balance_table = Hamt::<_,TokenAmount>::new_with_bit_width(store, 5)
+            .flush()
+            .unwrap();
+        
+        let empty_deal_ops_hamt = Hamt::<_,Cid>::new_with_bit_width(store, 5)
+            .flush()
+            .unwrap();
+        
+        let empty_pending_deal_allocation_map = Hamt::<_, AllocationID>::new_with_bit_width(store, 5)
+            .flush()
+            .unwrap();
+
         State {
             proposals: empty_proposals_array,
             states: empty_states_array,
