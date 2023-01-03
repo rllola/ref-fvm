@@ -118,7 +118,7 @@ pub fn set_storagemarket_actor(state_tree: &mut StateTree<impl Blockstore>, stor
         state: storagemarket_state_cid,
         sequence: 0,
         balance: Default::default(),
-        address: None,
+        delegated_address: None,
     };
 
     state_tree
@@ -140,7 +140,7 @@ pub fn set_storagepower_actor(state_tree: &mut StateTree<impl Blockstore>, stora
         state: storagepower_state_cid,
         sequence: 0,
         balance: Default::default(),
-        address: None,
+        delegated_address: None,
     };
 
     state_tree
@@ -162,7 +162,7 @@ pub fn set_verifiedregistry_actor(state_tree: &mut StateTree<impl Blockstore>, v
         state: verifiedregistry_state_cid,
         sequence: 0,
         balance: Default::default(),
-        address: None,
+        delegated_address: None,
     };
 
     state_tree
@@ -184,7 +184,7 @@ pub fn set_datacap_actor(state_tree: &mut StateTree<impl Blockstore>, datacap_co
         state: datacap_state_cid,
         sequence: 0,
         balance: Default::default(),
-        address: None,
+        delegated_address: None,
     };
 
     state_tree
@@ -206,7 +206,7 @@ pub fn set_reward_actor(state_tree: &mut StateTree<impl Blockstore>, reward_code
         state: reward_state_cid,
         sequence: 0,
         balance: Default::default(),
-        address: None,
+        delegated_address: None,
     };
 
     state_tree
